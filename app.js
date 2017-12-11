@@ -25,10 +25,10 @@ var app = express();
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'ejs');// jade 改为 ejs-2
+app.set('view engine', 'ejs');// jade 改为 ejs
 
 // uncomment after placing your favicon in /public
-app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));// 加小图标-3
+app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));// 加小图标
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -85,7 +85,7 @@ app.use(function(err, req, res, next) {
 
 
 //添加监听-1 ,开启服务器
-app.listen(3000,function () {
+app.listen(5000,function () {
     console.log('node is OK');
 })
 module.exports = app;
