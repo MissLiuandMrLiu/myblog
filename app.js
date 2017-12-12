@@ -85,7 +85,7 @@ app.use(function(err, req, res, next) {
 
 
 //添加监听-1 ,开启服务器
-app.listen(5000,function () {
+app.listen(3000,function () {
     console.log('node is OK');
 })
 module.exports = app;

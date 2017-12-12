@@ -38,7 +38,6 @@ User.prototype.save = function(callback){
         })
     })
 }
-
 //读取用户的信息
 User.get = function(username,callback){
     //打开数据库
@@ -58,7 +57,6 @@ User.get = function(username,callback){
                     return callback(err);
                 }
                 return callback(null,user);//成功返回查询的用户信息
-
             })
 
         })
