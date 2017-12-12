@@ -5,6 +5,17 @@ var mongodb = require('../model/db')
 var Post = require('../model/Post')
 //引入一个加密的文件
 var crypto = require('crypto')
+//引入上传的插件
+var multer = require('multer');
+var storage = multer.diskStorage({
+    destination:function (req,file,cb) {
+        cb(null,'./public/images')
+    },
+    filename:function (req,file,cb) {
+        cb(null,file.originalname)
+    }
+})
+var upload = multer({storage:storage})
 //未登录情况下,不允许访问发表和退出
 function checkLogin(req,res,next) {
     if(!req.session.user){
@@ -162,5 +173,19 @@ module.exports = function (app) {
         req.session.user = null;
         req.flash('success','退出成功');
         return res.redirect('/')
+    })
+    //上传页面
+    app.get('/upload',checkLogin,function (req,res) {
+        res.render('upload',{
+            title:'上传',
+            user:req.session.user,
+            success:req.flash('success').toString(),
+            error:req.flash('error').toString()
+        })
+    })
+    //上传行为
+    app.post('/upload',upload.array('filename',5),function (req,res) {
+        req.flash('success','上传成功');
+        return res.redirect('/upload')
     })
 }
