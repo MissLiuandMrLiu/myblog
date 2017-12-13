@@ -35,7 +35,7 @@ function checkNotLogin(req,res,next) {
 module.exports = function (app) {
     //首页页面
     app.get('/',function (req,res) {
-       Post.get(null,function (err,docs) {
+       Post.getAll(null,function (err,docs) {
            if(err){
                req.flash('error',err);
                return res.redirect('/')
@@ -187,5 +187,29 @@ module.exports = function (app) {
     app.post('/upload',upload.array('filename',5),function (req,res) {
         req.flash('success','上传成功');
         return res.redirect('/upload')
+    })
+    //用户页面
+    app.get('/u/:name',function (req,res) {
+        //检查用户是否存在
+        User.get(req.params.name,function (err,user) {
+            if(!user){
+                req.flash('error','查询用户名不存在');
+                return res.redirect('/')
+            }
+            //2.查询出name对应的所有该用户的文章
+            Post.getAll(user.username,function (err,docs) {
+                if(err){
+                    req.flash('error',err);
+                    return res.redirect('/')
+                }
+                return res.render('user',{
+                    title:'用户文章列表',
+                    user:req.session.user,
+                    success:req.flash('success').toString(),
+                    error:req.flash('error').toString(),
+                    docs:docs
+                })
+            })
+        })
     })
 }
