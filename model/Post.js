@@ -92,14 +92,96 @@ Post.getOne = function (name,title,time,callback) {
             collection.findOne({
                 name:name,
                 title:title,
-                time:time
+                time:time,
             },function (err,doc) {
                 mongodb.close();
                 if(err){
                     return callback(err);
                 }
+
                 doc.content = markdown.toHTML(doc.content);
+
                 return callback(null,doc)
+            })
+        })
+    })
+}
+//编辑
+Post.edit = function (name,title,time,callback) {
+    mongodb.open(function (err,db) {
+        if(err){
+            return callback(err);
+        }
+        db.collection('posts',function (err,collection) {
+            if(err){
+                mongodb.close();
+                return callback(err)
+            }
+            collection.findOne({
+                name:name,
+                title:title,
+                time:time,
+            },function (err,doc) {
+                mongodb.close();
+                if(err){
+                    return callback(err);
+                }
+                return callback(null,doc)
+            })
+        })
+    })
+}
+//修改
+Post.update = function (name,title,time,content,callback) {
+    mongodb.open(function (err,db) {
+        if(err){
+            return calback(err)
+        }
+        db.collection('posts',function (err,collection) {
+            if(err){
+                mongodb.close();
+                return callback(err)
+            }
+            collection.update({
+                name:name,
+                title:title,
+                time:time
+            },{
+                $set:{content:content}
+                },function (err,doc) {
+                mongodb.close();
+                if(err){
+                    return callback(err)
+                }
+                return callback(null,doc)
+                }
+            )
+        })
+    })
+}
+//删除
+Post.remove = function (name,title,time,callback) {
+    mongodb.open(function (err,db) {
+        if(err){
+            return callback(err)
+        }
+        db.collection('posts',function (err,collection) {
+            if(err){
+                mongodb.close();
+                return callback(err)
+            }
+            collection.remove({
+                name:name,
+                title:title,
+                time:time
+            },{
+                w:1
+            },function (err) {
+                mongodb.close();
+                if(err){
+                    return callback(err)
+                }
+                return callback(null)
             })
         })
     })
