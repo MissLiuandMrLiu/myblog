@@ -212,4 +212,20 @@ module.exports = function (app) {
             })
         })
     })
+        //文章详情
+    app.get('/u/:name/:title/:time',function (req,res) {
+        Post.getOne(req.params.name,req.params.title,req.params.time,function (err,doc) {
+            if(err){
+                req.flash('error',err)
+                return res.redirect('/')
+            }
+            return res.render('article',{
+                title:'文章详情页面',
+                user:req.session.user,
+                success:req.flash('success').toString(),
+                error:req.flash('error').toString(),
+                doc:doc
+            })
+        })
+    })
 }
