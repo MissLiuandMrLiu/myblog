@@ -9,6 +9,8 @@
 </p>
 <p>
    <%- doc.content %>
+<p class="info">阅读：<%= doc.pv %> | 评论：<%= doc.comments.length %></p>
 </p>
 <% }) %>
+<% include paging %>
 <% include footer %>

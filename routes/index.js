@@ -41,13 +41,19 @@ function formatDate(num){
 module.exports = function(app){
     //首页页面
     app.get('/',function(req,res){
-        Post.getAll(null,function(err,docs){
+        //如果当前传递了当前页数的参数，就以这个参数为准，否则就是 第一页
+        var page = parseInt(req.query.page) || 1;
+        Post.getTen(null,page,function(err,docs,total){
             if(err){
                 req.flash('error',err);
                 return res.redirect('/');
             }
             res.render('index',{
                 title:'首页',
+                page:page,//当前页数
+                //是不是第一页，如果是第一页的话，值true
+                isFirstPage:(page - 1) * 10 == 0,
+                isLastPage:(page - 1) * 10 + docs.length == total,
                 user:req.session.user,
                 success:req.flash('success').toString(),
                 error:req.flash('error').toString(),
@@ -156,7 +162,9 @@ module.exports = function(app){
     app.post('/post',function(req,res){
         //获取到当前登录用户的用户名
         var currentName = req.session.user.username;
-        var newPost = new Post(currentName,req.body.title,req.body.content);
+        //接收一下传递过来的标签数组
+        var tags = [req.body.tag1,req.body.tag2,req.body.tag3];
+        var newPost = new Post(currentName,req.body.title,req.body.content,tags);
         newPost.save(function(err){
             if(err){
                 req.flash('error',err);
@@ -189,6 +197,7 @@ module.exports = function(app){
     })
     //用户页面
     app.get('/u/:name',function(req,res){
+        var page = parseInt(req.query.page) || 1 ;
         //1.检查用户是否存在
         User.get(req.params.name,function(err,user){
             if(!user){
@@ -196,13 +205,16 @@ module.exports = function(app){
                 return res.redirect('/');
             }
             //2.查询出name对应的所有该用户的文章
-            Post.getAll(user.username,function(err,docs){
+            Post.getTen(user.username,page,function(err,docs,total){
                 if(err){
                     req.flash('error',err);
                     return res.redirect('/');
                 }
                 return res.render('user',{
                     title:'用户文章列表',
+                    page:page,
+                    isFirstPage:(page - 1) * 10 == 0,
+                    isLastPage:(page - 1) * 10 + docs.length == total,
                     user:req.session.user,
                     success:req.flash('success').toString(),
                     error:req.flash('error').toString(),
@@ -287,4 +299,69 @@ module.exports = function(app){
         })
 
     })
+    //存档
+    app.get('/archive',checkLogin,function(req,res){
+        Post.getArchive(function(err,docs){
+            if(err){
+                req.flash('error',err);
+                return res.redirect('/');
+            }
+            res.render('archive',{
+                title:'存档',
+                user:req.session.user,
+                success:req.flash('success').toString(),
+                error:req.flash('error').toString(),
+                docs:docs
+            })
+        })
+    })
+    //标签页面
+    app.get('/tags',checkLogin,function(req,res){
+        Post.getTags(function(err,docs){
+            if(err){
+                req.flash('error',err);
+                return res.redirect('/');
+            }
+            return res.render('tags',{
+                title:'标签列表',
+                user:req.session.user,
+                success:req.flash('success').toString(),
+                error:req.flash('error').toString(),
+                docs:docs
+            })
+        })
+    })
+    //显示标签所对应的文章
+    app.get('/tags/:tag',checkLogin,function(req,res){
+        Post.getTag(req.params.tag,function(err,docs){
+            if(err){
+                req.flash('error',err);
+                return res.redirect('/');
+            }
+            return res.render('tag',{
+                title:'标签列表页',
+                user:req.session.user,
+                success:req.flash('success').toString(),
+                error:req.flash('error').toString(),
+                docs:docs
+            })
+        })
+    })
+    //搜索
+    app.get('/search',function(req,res){
+        Post.search(req.query.keyword,function(err,docs){
+            if(err){
+                req.flash('error',err);
+                return res.redirect('/');
+            }
+            return res.render('search',{
+                title:'搜索结果',
+                user:req.session.user,
+                success:req.flash('success').toString(),
+                error:req.flash('error').toString(),
+                docs:docs
+            })
+        })
+    })
+
 }
